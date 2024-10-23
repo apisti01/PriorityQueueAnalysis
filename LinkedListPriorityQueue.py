@@ -3,8 +3,8 @@ from dataclasses import dataclass
 from typing import Optional
 
 from Node import Node
-import PriorityQueueItem
-import PriorityQueueInterface
+from PriorityQueueItem import PriorityQueueItem
+from PriorityQueueInterface import PriorityQueueInterface
 
 
 @dataclass
@@ -33,7 +33,7 @@ class LinkedListPriorityQueue(PriorityQueueInterface):
         current = self.head
 
         while current:
-            if current.priority > max_node.priority:
+            if current.priority() > max_node.priority():
                 max_node = current
                 max_node_prev = prev
             prev = current
@@ -57,7 +57,7 @@ class LinkedListPriorityQueue(PriorityQueueInterface):
         current = self.head
 
         while current:
-            if current.priority > max_node.priority:
+            if current.priority() > max_node.priority():
                 max_node = current
             current = current.next
 
