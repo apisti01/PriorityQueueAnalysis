@@ -60,8 +60,9 @@ class MaxHeapPriorityQueue(PriorityQueueInterface):
             raise IndexError("extract_max from an empty priority queue")
         max_item = self._heap[0]
         # Move the last item to the root and heapify down
-        self._heap[0] = self._heap.pop()  # Pop the last item and place it at the root
+        last_item = self._heap.pop()  # Pop the last item and place it at the root
         if not self.is_empty():
+            self._heap[0] = last_item
             self._heapify_down(0)
         return max_item
 

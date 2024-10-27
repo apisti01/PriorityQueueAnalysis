@@ -16,6 +16,11 @@ def test_priority_queue(pq_class):
     print("Next max item:", pq.peek_max())  # Should print "task2"
     print("\n")
 
+    pq.extract_max()
+    pq.extract_max()
+    pq.extract_max()
+    print(pq)
+
 
 def main():
     pq_classes = [
