@@ -3,7 +3,7 @@ import random
 from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 
 from PriorityQueueItem import PriorityQueueItem
 from PriorityQueueInterface import PriorityQueueInterface
@@ -12,6 +12,11 @@ from MaxHeapPriorityQueue import MaxHeapPriorityQueue
 from LinkedListPriorityQueue import LinkedListPriorityQueue
 from OrderedLinkedListPriorityQueue import OrderedLinkedListPriorityQueue
 
+implementations = [
+    (MaxHeapPriorityQueue, "Max Heap"),
+    (LinkedListPriorityQueue, "Unordered Linked List"),
+    (OrderedLinkedListPriorityQueue, "Ordered Linked List")
+]
 
 def generate_random_data(size: int) -> List[PriorityQueueItem]:
     """Generate random test data."""
@@ -23,35 +28,28 @@ def test_implementation(queue_class, data: List[PriorityQueueItem]) -> Tuple[flo
     queue = queue_class()
 
     # Measure insert time
-    start_time = time.time()
+    start_time = time.perf_counter()
     for item in data:
         queue.insert(item)
-    insert_time = time.time() - start_time
+    insert_time = time.perf_counter() - start_time
 
     # Measure peek time
-    start_time = time.time()
+    start_time = time.perf_counter()
     for _ in range(len(data) // 10):  # Test peek 10% of size times
         queue.peek_max()
-    peek_time = (time.time() - start_time) * 10  # Normalize to full size
+    peek_time = (time.perf_counter() - start_time) * 10  # Normalize to full size
 
     # Measure extract time
-    start_time = time.time()
+    start_time = time.perf_counter()
     while not queue.is_empty():
         queue.extract_max()
-    extract_time = time.time() - start_time
+    extract_time = time.perf_counter() - start_time
 
     return insert_time, peek_time, extract_time
 
 
 def run_performance_tests():
-    """Run comprehensive performance tests on all implementations."""
-    implementations = [
-        (MaxHeapPriorityQueue, "Max Heap"),
-        (LinkedListPriorityQueue, "Unordered Linked List"),
-        (OrderedLinkedListPriorityQueue, "Ordered Linked List")
-    ]
-
-    sizes = [100, 500, 1000, 5000, 10000]
+    sizes = [50, 100,250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     results = {name: {
         'insert': [], 'peek': [], 'extract': [], 'total': []
     } for _, name in implementations}
@@ -73,17 +71,37 @@ def run_performance_tests():
     return sizes, results
 
 
-def plot_results(sizes: List[int], results: dict):
+def plot_results(sizes: List[int], results: Dict[str, Dict[str, List[float]]]):
     """Create visualizations of the performance results."""
     operations = ['insert', 'peek', 'extract', 'total']
-    fig, axes = plt.subplots(2, 2, figsize=(15, 12))
-    fig.suptitle('Priority Queue Implementation Performance Comparison')
+
+    # Normal scale plot
+    fig_normal, axes_normal = plt.subplots(2, 2, figsize=(15, 12))
+    fig_normal.suptitle('Priority Queue Implementation Performance Comparison (Normal Scale)')
 
     for idx, operation in enumerate(operations):
-        ax = axes[idx // 2, idx % 2]
+        ax = axes_normal[idx // 2, idx % 2]
         for impl_name in results.keys():
-            ax.plot(sizes, results[impl_name][operation],
-                    marker='o', label=impl_name)
+            ax.plot(sizes, results[impl_name][operation], marker='o', label=impl_name)
+
+        ax.set_xlabel('Input Size')
+        ax.set_ylabel('Time (seconds)')
+        ax.set_title(f'{operation.capitalize()} Operation Performance')
+        ax.grid(True)
+        ax.legend()
+
+    plt.tight_layout()
+    plt.savefig('priority_queue_performance_normal.png')
+    plt.close(fig_normal)
+
+    # Log scale plot
+    fig_log, axes_log = plt.subplots(2, 2, figsize=(15, 12))
+    fig_log.suptitle('Priority Queue Implementation Performance Comparison (Log Scale)')
+
+    for idx, operation in enumerate(operations):
+        ax = axes_log[idx // 2, idx % 2]
+        for impl_name in results.keys():
+            ax.plot(sizes, results[impl_name][operation], marker='o', label=impl_name)
 
         ax.set_xlabel('Input Size')
         ax.set_ylabel('Time (seconds)')
@@ -93,7 +111,8 @@ def plot_results(sizes: List[int], results: dict):
         ax.set_yscale('log')
 
     plt.tight_layout()
-    return fig
+    plt.savefig('priority_queue_performance_log.png')
+    plt.close(fig_log)
 
 
 def verify_correctness(size: int = 1000):
@@ -136,9 +155,7 @@ def main():
     sizes, results = run_performance_tests()
 
     # Create and save visualization
-    fig = plot_results(sizes, results)
-    plt.savefig('priority_queue_performance.png')
-    plt.close()
+    plot_results(sizes, results)
 
     # Print summary of findings
     print("\nPerformance Summary:")
