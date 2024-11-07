@@ -1,3 +1,4 @@
+import os
 import time
 import random
 from dataclasses import dataclass
@@ -12,18 +13,21 @@ from MaxHeapPriorityQueue import MaxHeapPriorityQueue
 from LinkedListPriorityQueue import LinkedListPriorityQueue
 from OrderedLinkedListPriorityQueue import OrderedLinkedListPriorityQueue
 
-implementations = [
-    (MaxHeapPriorityQueue, "Max Heap"),
-    (LinkedListPriorityQueue, "Unordered Linked List"),
-    (OrderedLinkedListPriorityQueue, "Ordered Linked List")
-]
 
-def generate_random_data(size: int) -> List[PriorityQueueItem]:
-    """Generate random test data."""
-    return [PriorityQueueItem(priority=random.randint(1, 10000), item=f"value_{i}") for i in range(size)]
+def generate_test_data(size: int, pattern: str = "random") -> List[PriorityQueueItem]:
+    """Generate test data with different patterns."""
+    if pattern == "random":
+        return [PriorityQueueItem(priority=random.randint(1, 10000),
+                                  item=f"value_{i}") for i in range(size)]
+    elif pattern == "ascending":
+        return [PriorityQueueItem(priority=i,
+                                  item=f"value_{i}") for i in range(size)]
+    elif pattern == "descending":
+        return [PriorityQueueItem(priority=size - i,
+                                  item=f"value_{i}") for i in range(size)]
 
 
-def test_implementation(queue_class, data: List[PriorityQueueItem]) -> Tuple[float, float, float]:
+def test_implementation(queue_class, data: List[PriorityQueueItem]) -> tuple[float, float, float, float]:
     """Test a specific implementation and return timing results."""
     queue = queue_class()
 
@@ -45,80 +49,100 @@ def test_implementation(queue_class, data: List[PriorityQueueItem]) -> Tuple[flo
         queue.extract_max()
     extract_time = time.perf_counter() - start_time
 
-    return insert_time, peek_time, extract_time
+    # Measure mixed use time
+    ops_count = len(data)
+    start_time = time.perf_counter()
+    for i in range(ops_count):
+        if random.random() < 0.6:  # 60% insert, 40% extract
+            queue.insert(data[i])
+        elif not queue.is_empty():
+            queue.extract_max()
+    mixed_time = time.perf_counter() - start_time
+
+    return insert_time, peek_time, extract_time, mixed_time
 
 
-def run_performance_tests():
-    sizes = [50, 100,250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
-    results = {name: {
-        'insert': [], 'peek': [], 'extract': [], 'total': []
-    } for _, name in implementations}
+def run_performance_tests(sizes):
+    implementations = [
+        (MaxHeapPriorityQueue, "Max Heap"),
+        (LinkedListPriorityQueue, "Unordered Linked List"),
+        (OrderedLinkedListPriorityQueue, "Ordered Linked List")
+    ]
+    patterns = ['random', 'ascending', 'descending']
+    operations = ['insert', 'peek', 'extract', 'mixed']
+
+    results = {name: {pattern: {operation: [] for operation in operations} for pattern in patterns} for _, name in
+               implementations}
 
     for size in sizes:
         print(f"\nTesting with size {size}")
-        data = generate_random_data(size)
 
-        for impl_class, name in implementations:
-            print(f"Testing {name}...")
-            insert_time, peek_time, extract_time = test_implementation(impl_class, data.copy())
-            total_time = insert_time + peek_time + extract_time
+        for pattern in ["random", "ascending", "descending"]:
+            print(f"Generating {pattern} data...")
+            data = generate_test_data(size, pattern)
 
-            results[name]['insert'].append(insert_time)
-            results[name]['peek'].append(peek_time)
-            results[name]['extract'].append(extract_time)
-            results[name]['total'].append(total_time)
+            for impl_class, name in implementations:
+                print(f"Testing {name} with {pattern} data...")
+                insert_time, peek_time, extract_time, mixed_time = test_implementation(impl_class, data.copy())
+                results[name][pattern]['insert'].append(insert_time)
+                results[name][pattern]['peek'].append(peek_time)
+                results[name][pattern]['extract'].append(extract_time)
+                results[name][pattern]['mixed'].append(mixed_time)
 
-    return sizes, results
+    return results
 
 
-def plot_results(sizes: List[int], results: Dict[str, Dict[str, List[float]]]):
+def plot_results(sizes: List[int], results: Dict[str, Dict[str, Dict[str, List[float]]]]):
     """Create visualizations of the performance results."""
-    operations = ['insert', 'peek', 'extract', 'total']
+    operations = ['insert', 'peek', 'extract', 'mixed']
+    patterns = ['random', 'ascending', 'descending']
 
-    # Normal scale plot
-    fig_normal, axes_normal = plt.subplots(2, 2, figsize=(15, 12))
-    fig_normal.suptitle('Priority Queue Implementation Performance Comparison (Normal Scale)')
+    for pattern in patterns:
+        for idx, operation in enumerate(operations):
+            fig_normal, ax = plt.subplots(figsize=(15, 10))
+            fig_normal.suptitle(
+                f'Priority Queue Implementation Performance Comparison (Normal Scale) - {pattern.capitalize()} Data - {operation.capitalize()} Operation')
 
-    for idx, operation in enumerate(operations):
-        ax = axes_normal[idx // 2, idx % 2]
-        for impl_name in results.keys():
-            ax.plot(sizes, results[impl_name][operation], marker='o', label=impl_name)
+            for impl_name in results.keys():
+                ax.plot(sizes, results[impl_name][pattern][operation], marker='o', label=impl_name)
 
-        ax.set_xlabel('Input Size')
-        ax.set_ylabel('Time (seconds)')
-        ax.set_title(f'{operation.capitalize()} Operation Performance')
-        ax.grid(True)
-        ax.legend()
+            ax.set_xlabel('Input Size')
+            ax.set_ylabel('Time (seconds)')
+            ax.grid(True)
+            ax.legend()
 
-    plt.tight_layout()
-    plt.savefig('priority_queue_performance_normal.png')
-    plt.close(fig_normal)
+            plt.tight_layout()
+            if not os.path.exists('performance_normal'):
+                os.makedirs('performance_normal')
+            plt.savefig(f'performance_normal/priority_queue_performance_normal_{pattern}_{operation}.png')
+            plt.close(fig_normal)
 
-    # Log scale plot
-    fig_log, axes_log = plt.subplots(2, 2, figsize=(15, 12))
-    fig_log.suptitle('Priority Queue Implementation Performance Comparison (Log Scale)')
+        # Log scale plot
+        for idx, operation in enumerate(operations):
+            fig_log, ax = plt.subplots(figsize=(15, 10))
+            fig_log.suptitle(
+                f'Priority Queue Implementation Performance Comparison (Log Scale) - {pattern.capitalize()} Data - {operation.capitalize()} Operation')
 
-    for idx, operation in enumerate(operations):
-        ax = axes_log[idx // 2, idx % 2]
-        for impl_name in results.keys():
-            ax.plot(sizes, results[impl_name][operation], marker='o', label=impl_name)
+            for impl_name in results.keys():
+                ax.plot(sizes, results[impl_name][pattern][operation], marker='o', label=impl_name)
 
-        ax.set_xlabel('Input Size')
-        ax.set_ylabel('Time (seconds)')
-        ax.set_title(f'{operation.capitalize()} Operation Performance')
-        ax.grid(True)
-        ax.legend()
-        ax.set_yscale('log')
+            ax.set_xlabel('Input Size')
+            ax.set_ylabel('Time (seconds)')
+            ax.grid(True)
+            ax.legend()
+            ax.set_yscale('log')
 
-    plt.tight_layout()
-    plt.savefig('priority_queue_performance_log.png')
-    plt.close(fig_log)
+            plt.tight_layout()
+            if not os.path.exists('performance_log'):
+                os.makedirs('performance_log')
+            plt.savefig(f'performance_log/priority_queue_performance_log_{pattern}_{operation}.png')
+            plt.close(fig_log)
 
 
 def verify_correctness(size: int = 1000):
     """Verify that all implementations maintain correct ordering."""
     print("\nVerifying correctness of implementations...")
-    data = generate_random_data(size)
+    data = generate_test_data(size)
     implementations = [
         (MaxHeapPriorityQueue(), "Max Heap"),
         (LinkedListPriorityQueue(), "Unordered Linked List"),
@@ -152,21 +176,11 @@ def main():
 
     # Then run performance tests
     print("\nRunning performance tests...")
-    sizes, results = run_performance_tests()
+    sizes = [50, 100, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
+    results = run_performance_tests(sizes)
 
     # Create and save visualization
     plot_results(sizes, results)
-
-    # Print summary of findings
-    print("\nPerformance Summary:")
-    print("-" * 50)
-    for impl_name in results.keys():
-        print(f"\n{impl_name}:")
-        print(
-            f"Average insert time: {sum(results[impl_name]['insert']) / len(results[impl_name]['insert']):.6f} seconds")
-        print(f"Average peek time: {sum(results[impl_name]['peek']) / len(results[impl_name]['peek']):.6f} seconds")
-        print(
-            f"Average extract time: {sum(results[impl_name]['extract']) / len(results[impl_name]['extract']):.6f} seconds")
 
 
 if __name__ == "__main__":

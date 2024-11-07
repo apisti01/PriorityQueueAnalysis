@@ -1,4 +1,4 @@
-from PriorityQueueItem  import PriorityQueueItem
+from PriorityQueueItem import PriorityQueueItem
 from MaxHeapPriorityQueue import MaxHeapPriorityQueue
 from LinkedListPriorityQueue import LinkedListPriorityQueue
 from OrderedLinkedListPriorityQueue import OrderedLinkedListPriorityQueue

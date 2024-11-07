@@ -96,7 +96,6 @@ def plot_results(results: Dict[str, Dict[str, List[float]]]):
 
             ax_raw.set_xlabel('Number of Operations')
             ax_raw.set_ylabel('Time (seconds)')
-            ax_raw.set_title(f'{operation.capitalize()} Operation')
             ax_raw.legend()
             ax_raw.grid(True, alpha=0.3)
 
@@ -170,7 +169,6 @@ def plot_smoothed_results(results: Dict[str, Dict[str, List[float]]]):
 
             ax_smooth.set_xlabel('Number of Operations')
             ax_smooth.set_ylabel('Time (seconds)')
-            ax_smooth.set_title(f'{operation.capitalize()} Operation')
             ax_smooth.legend()
             ax_smooth.grid(True, alpha=0.3)
 
