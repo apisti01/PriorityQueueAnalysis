@@ -1,14 +1,12 @@
 import os
 import time
 import random
-from dataclasses import dataclass
 import matplotlib.pyplot as plt
 import numpy as np
 from typing import List, Dict
 from scipy import stats
 
 from PriorityQueueItem import PriorityQueueItem
-from PriorityQueueInterface import PriorityQueueInterface
 from MaxHeapPriorityQueue import MaxHeapPriorityQueue
 from LinkedListPriorityQueue import LinkedListPriorityQueue
 from OrderedLinkedListPriorityQueue import OrderedLinkedListPriorityQueue
@@ -184,11 +182,11 @@ def plot_smoothed_results(results: Dict[str, Dict[str, List[float]]]):
             plt.close(fig)
 
 
-def main():
+def analyse_asymptotic_behaviour():
     implementations = [
-        (MaxHeapPriorityQueue, "Max Heap", 100000, 100),
-        (LinkedListPriorityQueue, "Unordered Linked List", 20000, 20),
-        (OrderedLinkedListPriorityQueue, "Ordered Linked List", 20000, 20)
+        (MaxHeapPriorityQueue, "Max Heap", 500000, 500),
+        (LinkedListPriorityQueue, "Unordered Linked List", 30000, 30),
+        (OrderedLinkedListPriorityQueue, "Ordered Linked List", 40000, 40)
     ]
 
     # Run tests for each implementation
@@ -207,4 +205,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    analyse_asymptotic_behaviour()

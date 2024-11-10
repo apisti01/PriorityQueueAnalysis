@@ -1,14 +1,10 @@
 import os
 import time
 import random
-from dataclasses import dataclass
 import matplotlib.pyplot as plt
-import numpy as np
-from typing import List, Tuple, Dict
+from typing import List, Dict
 
 from PriorityQueueItem import PriorityQueueItem
-from PriorityQueueInterface import PriorityQueueInterface
-from Node import Node
 from MaxHeapPriorityQueue import MaxHeapPriorityQueue
 from LinkedListPriorityQueue import LinkedListPriorityQueue
 from OrderedLinkedListPriorityQueue import OrderedLinkedListPriorityQueue
@@ -170,13 +166,13 @@ def verify_correctness(size: int = 1000):
         print(f"{name}: {'✓ Correct' if is_correct and count == len(data) else '✗ Incorrect'}")
 
 
-def main():
+def compare_performances():
     # First verify correctness
     verify_correctness()
 
     # Then run performance tests
     print("\nRunning performance tests...")
-    sizes = [50, 100, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000]
+    sizes = [50, 100, 250, 500, 750, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]
     results = run_performance_tests(sizes)
 
     # Create and save visualization
@@ -184,4 +180,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    compare_performances()
