@@ -1,3 +1,4 @@
+import gc
 import os
 import time
 import random
@@ -25,6 +26,7 @@ def measure_performance(queue_class, data: List[PriorityQueueItem], batch_size) 
         'peek': [],
         'extract': []
     }
+    gc.disable()
 
     # Measure insert and peek operations while building
     for i in range(0, len(data), batch_size):
@@ -60,6 +62,8 @@ def measure_performance(queue_class, data: List[PriorityQueueItem], batch_size) 
         end_time = time.perf_counter()
         operation_time = end_time - start_time
         results['extract'].append(operation_time)
+
+    gc.enable()
 
     return results
 
@@ -184,7 +188,7 @@ def plot_smoothed_results(results: Dict[str, Dict[str, List[float]]]):
 
 def analyse_asymptotic_behaviour():
     implementations = [
-        (MaxHeapPriorityQueue, "Max Heap", 500000, 500),
+        (MaxHeapPriorityQueue, "Max Heap", 1000000, 1000),
         (LinkedListPriorityQueue, "Unordered Linked List", 30000, 30),
         (OrderedLinkedListPriorityQueue, "Ordered Linked List", 40000, 40)
     ]

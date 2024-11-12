@@ -1,3 +1,4 @@
+import gc
 import os
 import time
 import random
@@ -26,6 +27,7 @@ def generate_test_data(size: int, pattern: str = "random") -> List[PriorityQueue
 def test_implementation(queue_class, data: List[PriorityQueueItem]) -> tuple[float, float, float, float]:
     """Test a specific implementation and return timing results."""
     queue = queue_class()
+    gc.disable()
 
     # Measure insert time
     start_time = time.perf_counter()
@@ -54,6 +56,7 @@ def test_implementation(queue_class, data: List[PriorityQueueItem]) -> tuple[flo
         elif not queue.is_empty():
             queue.extract_max()
     mixed_time = time.perf_counter() - start_time
+    gc.enable()
 
     return insert_time, peek_time, extract_time, mixed_time
 
