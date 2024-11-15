@@ -15,7 +15,7 @@ from OrderedLinkedListPriorityQueue import OrderedLinkedListPriorityQueue
 
 def generate_random_data(size: int) -> List[PriorityQueueItem]:
     """Generate random test data."""
-    return [PriorityQueueItem(priority=random.randint(1, 10000), item=f"value_{i}")
+    return [PriorityQueueItem(priority=random.randint(1, 100000000), item=f"value_{i}")
             for i in range(size)]
 
 
@@ -69,12 +69,6 @@ def measure_performance(queue_class, data: List[PriorityQueueItem], batch_size) 
 
 
 def plot_results(results: Dict[str, Dict[str, List[float]]]):
-    """
-    Create detailed visualizations with:
-    1. Separate figure for each implementation
-    2. Subplots for insert, peek, extract operations
-    3. trend analysis
-    """
     plt.close('all')  # Close any existing plots
 
     for impl_name, impl_results in results.items():
@@ -123,13 +117,6 @@ def remove_outliers(data: List[float], z_threshold: float = 4.0) -> List[float]:
 
 
 def plot_smoothed_results(results: Dict[str, Dict[str, List[float]]]):
-    """
-    Create smoothed visualizations with:
-    1. Separate figure for each implementation
-    2. Subplots for insert, peek, extract operations
-    3. Remove outliers and smooth the data
-    4. Adjust the y-axis scaling to highlight the trends
-    """
     plt.close('all')  # Close any existing plots
 
     for impl_name, impl_results in results.items():
@@ -188,7 +175,7 @@ def plot_smoothed_results(results: Dict[str, Dict[str, List[float]]]):
 
 def analyse_asymptotic_behaviour():
     implementations = [
-        (MaxHeapPriorityQueue, "Max Heap", 1000000, 1000),
+        (MaxHeapPriorityQueue, "Max Heap", 100000, 100),
         (LinkedListPriorityQueue, "Unordered Linked List", 30000, 30),
         (OrderedLinkedListPriorityQueue, "Ordered Linked List", 40000, 40)
     ]

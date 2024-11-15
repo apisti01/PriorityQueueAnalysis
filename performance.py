@@ -25,7 +25,6 @@ def generate_test_data(size: int, pattern: str = "random") -> List[PriorityQueue
 
 
 def test_implementation(queue_class, data: List[PriorityQueueItem]) -> tuple[float, float, float, float]:
-    """Test a specific implementation and return timing results."""
     queue = queue_class()
     gc.disable()
 
